@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:my_fin_asisstant/service/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-import '../service/api_service.dart';
 import '../service/text_to_speech_service.dart';
 
 // Models
@@ -66,8 +66,6 @@ class CategoryStat {
   );
 }
 
-// Services
-
 // Main Page
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});
@@ -79,14 +77,13 @@ class CategoriesPage extends StatefulWidget {
 class _CategoriesPageState extends State<CategoriesPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  late TextToSpeechService _tts;
+  final TextToSpeechService _tts = TextToSpeechService();
 
   @override
   void initState() {
     super.initState();
-    _tts = TextToSpeechService();
-
     _tabController = TabController(length: 2, vsync: this);
+    _tts.setEngine("RHVoice");
   }
 
   @override
@@ -101,21 +98,7 @@ class _CategoriesPageState extends State<CategoriesPage>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Financial Dashboard'),
-        actions: [
-          IconButton(
-            icon: Icon(_tts.isEnabled ? Icons.volume_up : Icons.volume_off),
-            onPressed: () {
-              setState(() {
-                _tts.toggleTTS(!_tts.isEnabled);
-              });
-              _tts.speak(
-                _tts.isEnabled
-                    ? "Ovozli rejim yoqildi"
-                    : "Ovozli rejim o'chirildi",
-              );
-            },
-          ),
-        ],
+
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -136,47 +119,16 @@ class _CategoriesPageState extends State<CategoriesPage>
 }
 
 // Expenses Tab
-class ExpensesTab extends StatefulWidget {
+class ExpensesTab extends StatelessWidget {
   const ExpensesTab({super.key});
 
   @override
-  State<ExpensesTab> createState() => _ExpensesTabState();
-}
-
-class _ExpensesTabState extends State<ExpensesTab> {
-  final TextToSpeechService _tts = TextToSpeechService();
-  late Future<List<CategoryStat>> _categoriesFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _tts.init();
-    _categoriesFuture =await ApiService().getCategory();
-  }
-
-  @override
-  void dispose() {
-    _tts.stop();
-    super.dispose();
-  }
-
-  Color _getColorForCategory(int id) {
-    const colors = [
-      Colors.red,
-      Colors.blue,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-      Colors.cyan,
-    ];
-    return colors[id % colors.length];
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final _tts = TextToSpeechService();
+
     return Scaffold(
-      body: FutureBuilder<List<CategoryStat>>(
-        future: _categoriesFuture,
+      body: FutureBuilder(
+        future: ApiService().getCategory(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             _tts.speak("Xarajatlar ma'lumotlari yuklanmoqda");
@@ -209,9 +161,8 @@ class _ExpensesTabState extends State<ExpensesTab> {
                             return PieChartSectionData(
                               color: _getColorForCategory(e.id),
                               value: e.totalAmount,
-                              title:
-                                  '${e.name}\n${e.totalAmount.toStringAsFixed(0)}',
-                              showTitle: true,
+
+                              showTitle: false,
                               titleStyle: const TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
@@ -266,6 +217,18 @@ class _ExpensesTabState extends State<ExpensesTab> {
       ),
     );
   }
+
+  static Color _getColorForCategory(int id) {
+    const colors = [
+      Colors.red,
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.cyan,
+    ];
+    return colors[id % colors.length];
+  }
 }
 
 // Goals Tab
@@ -278,7 +241,7 @@ class GoalsTab extends StatefulWidget {
 
 class _GoalsTabState extends State<GoalsTab> {
   final List<FinancialGoal> _goals = [];
-  final TextToSpeechService _tts = TextToSpeechService();
+  final _tts = TextToSpeechService();
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _targetController = TextEditingController();
@@ -289,7 +252,6 @@ class _GoalsTabState extends State<GoalsTab> {
   @override
   void initState() {
     super.initState();
-    _tts.init();
     _loadGoals();
   }
 

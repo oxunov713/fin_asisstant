@@ -16,7 +16,8 @@ class _HomePageState extends State<HomePage> {
   List<BankModel> banks = [];
   final TextToSpeechService _tts = TextToSpeechService();
   bool _isSpeaking = false;
-// In your widget state class, add these variables
+
+  // In your widget state class, add these variables
   int _currentBannerIndex = 0;
   final List<Map<String, dynamic>> _banners = [
     {
@@ -36,13 +37,15 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
-// Add this timer initialization in initState()
+  // Add this timer initialization in initState()
   Timer? _bannerTimer;
 
   @override
   void initState() {
     super.initState();
-    _fetchBankData();_startBannerRotation();
+    _tts.setEngine("RHVoice");
+    _fetchBankData();
+    _startBannerRotation();
   }
 
   Future<void> _fetchBankData() async {
@@ -51,6 +54,7 @@ class _HomePageState extends State<HomePage> {
       banks = fetchedBanks;
     });
   }
+
   void _startBannerRotation() {
     _bannerTimer = Timer.periodic(Duration(seconds: 2), (timer) {
       setState(() {
@@ -58,6 +62,7 @@ class _HomePageState extends State<HomePage> {
       });
     });
   }
+
   String _translateCurrency(String currency) {
     switch (currency.toUpperCase()) {
       case 'USD':
@@ -87,13 +92,14 @@ class _HomePageState extends State<HomePage> {
     if (amount == null) return '';
     return amount.toString().replaceAllMapped(
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]} ',
+      (Match m) => '${m[1]} ',
     );
   }
 
   @override
   void dispose() {
-    _tts.stop();_bannerTimer?.cancel();
+    _tts.stop();
+    _bannerTimer?.cancel();
     super.dispose();
   }
 
@@ -143,7 +149,9 @@ class _HomePageState extends State<HomePage> {
             duration: Duration(milliseconds: 500),
             child: GestureDetector(
               key: ValueKey<int>(_currentBannerIndex),
-              onTap: () => _speakWithFeedback(_banners[_currentBannerIndex]['text']),
+              onTap:
+                  () =>
+                      _speakWithFeedback(_banners[_currentBannerIndex]['text']),
               child: Container(
                 key: ValueKey<int>(_currentBannerIndex),
                 height: 150,
@@ -214,8 +222,9 @@ class _HomePageState extends State<HomePage> {
                           height: 50,
                           width: 50,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.account_balance),
+                          errorBuilder:
+                              (context, error, stackTrace) =>
+                                  const Icon(Icons.account_balance),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -250,14 +259,18 @@ class _HomePageState extends State<HomePage> {
               final bank = banks[index];
 
               return GestureDetector(
-                onTap: () => _speakWithFeedback(
-                    '${bank.name} banki valyuta kurslari. ${bank.exchangeRates!.map((rate) {
-                      final currencyName = _translateCurrency(rate.currency!);
-                      return '1 $currencyName ${rate.toBuy} so\'mga sotib olinadi, ${rate.toSell} so\'mga sotiladi';
-                    }).join('. ')}'
-                ),
+                onTap:
+                    () => _speakWithFeedback(
+                      '${bank.name} banki valyuta kurslari. ${bank.exchangeRates!.map((rate) {
+                        final currencyName = _translateCurrency(rate.currency!);
+                        return '1 $currencyName ${rate.toBuy} so\'mga sotib olinadi, ${rate.toSell} so\'mga sotiladi';
+                      }).join('. ')}',
+                    ),
                 child: Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 12,
+                  ),
                   elevation: 3,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -285,47 +298,53 @@ class _HomePageState extends State<HomePage> {
                         Wrap(
                           spacing: 100,
                           runSpacing: 50,
-                          children: bank.exchangeRates!.map((rate) {
-                            final currencyName = _translateCurrency(rate.currency!);
-                            return GestureDetector(
-                              onTap: () => _speakWithFeedback(
-                                  '1 $currencyName ${rate.toBuy} so\'mga sotib olinadi, ${rate.toSell} so\'mga sotiladi'),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    rate.currency!,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(
-                                        Icons.arrow_downward,
-                                        color: Colors.green,
-                                        size: 16,
+                          children:
+                              bank.exchangeRates!.map((rate) {
+                                final currencyName = _translateCurrency(
+                                  rate.currency!,
+                                );
+                                return GestureDetector(
+                                  onTap:
+                                      () => _speakWithFeedback(
+                                        '1 $currencyName ${rate.toBuy} so\'mga sotib olinadi, ${rate.toSell} so\'mga sotiladi',
                                       ),
-                                      Text("${rate.toBuy}"),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        rate.currency!,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.arrow_downward,
+                                            color: Colors.green,
+                                            size: 16,
+                                          ),
+                                          Text("${rate.toBuy}"),
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.arrow_upward,
+                                            color: Colors.red,
+                                            size: 16,
+                                          ),
+                                          Text("${rate.toSell}"),
+                                        ],
+                                      ),
                                     ],
                                   ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(
-                                        Icons.arrow_upward,
-                                        color: Colors.red,
-                                        size: 16,
-                                      ),
-                                      Text("${rate.toSell}"),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
+                                );
+                              }).toList(),
                         ),
                       ],
                     ),
@@ -345,15 +364,15 @@ class _HomePageState extends State<HomePage> {
             });
           } else {
             _speakWithFeedback(
-                'Bosh sahifa. Umumiy balansingiz 517 ming so\'m. '
-                    'Umumiy xarajatingiz 517 ming so\'m. '
-                    'Sizda ${banks.length} ta bank mavjud. '
-                    'Valyuta kurslari: ${banks.map((bank) {
-                  return '${bank.name} bankida ${bank.exchangeRates!.map((rate) {
-                    final currencyName = _translateCurrency(rate.currency!);
-                    return '1 $currencyName ${rate.toBuy} so\'m';
-                  }).join(', ')}';
-                }).join('. ')}'
+              'Bosh sahifa. Umumiy balansingiz 517 ming so\'m. '
+              'Umumiy xarajatingiz 517 ming so\'m. '
+              'Sizda ${banks.length} ta bank mavjud. '
+              'Valyuta kurslari: ${banks.map((bank) {
+                return '${bank.name} bankida ${bank.exchangeRates!.map((rate) {
+                  final currencyName = _translateCurrency(rate.currency!);
+                  return '1 $currencyName ${rate.toBuy} so\'m';
+                }).join(', ')}';
+              }).join('. ')}',
             );
           }
         },

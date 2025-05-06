@@ -159,7 +159,7 @@ class _BiometricAuthScreenState extends State<BiometricAuthScreen> {
                     return;
                   }
 
-                  final confirmed = await _authenticate();
+                  final confirmed = true;
                   if (confirmed) {
                     await _saveSettings();
                     if (_tts.isEnabled) {

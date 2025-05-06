@@ -18,6 +18,7 @@ class _ServicesSectionState extends State<ServicesSection> {
   @override
   void initState() {
     super.initState();
+    _tts.setEngine("RHVoice");
     loanList = fetchLoans();
   }
 

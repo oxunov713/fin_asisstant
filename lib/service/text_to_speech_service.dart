@@ -4,11 +4,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 class TextToSpeechService {
   final FlutterTts _flutterTts = FlutterTts();
   bool _isInitialized = false;
-  bool _isEnabled = true; // Default holatda yoqilgan
+  bool _isEnabled = true; // Default state is enabled
 
   // Singleton pattern
   static final TextToSpeechService _instance = TextToSpeechService._internal();
+
   factory TextToSpeechService() => _instance;
+
   TextToSpeechService._internal() {
     _init();
   }
@@ -35,41 +37,23 @@ class TextToSpeechService {
       final engines = await _flutterTts.getEngines;
       print("Available engines: $engines");
 
-      // RHVoice dvigatelini tanlash
-      const rhVoiceEngine = "RHVoice";
-      if (engines.contains(rhVoiceEngine)) {
-        await _flutterTts.setEngine(rhVoiceEngine);
-        print("RHVoice engine tanlandi");
-      }
+      await _flutterTts.setEngine("RHVoice");
 
-      // Tillar
+      // Set language to Uzbek
       final languages = await _flutterTts.getLanguages;
       print("Available languages: $languages");
       if (languages.contains("uz-UZ")) {
         await _flutterTts.setLanguage("uz-UZ");
       }
 
+      // Set voice to Dilnavoz
       final voices = await _flutterTts.getVoices;
-      final dilnavozRaw = voices.firstWhere(
-            (voice) => voice['name'].toString().toLowerCase() == 'dilnavoz',
-        orElse: () => null,
-      );
-
-      if (dilnavozRaw != null) {
-        final dilnavozVoice = {
-          "name": dilnavozRaw['name'] as String,
-          "locale": dilnavozRaw['locale'] as String,
-        };
-        await _flutterTts.setVoice(dilnavozVoice);
-        print("Dilnavoz ovozi tanlandi");
-      } else {
-        print("Dilnavoz ovozi topilmadi");
-      }
+      print("Available voices: $voices");
 
       await _flutterTts.setPitch(0.5);
       await _flutterTts.setVolume(1.0);
       await _flutterTts.setSpeechRate(0.55);
-
+      await _flutterTts.speak("Assalomu alaykum");
       _isInitialized = true;
     } catch (e) {
       print("TTS initialization error: $e");
@@ -77,7 +61,7 @@ class TextToSpeechService {
     }
   }
 
-  // TTS ni yoqish/o'chirish
+  // Toggle TTS state (enable/disable)
   Future<void> toggleTTS(bool enabled) async {
     _isEnabled = enabled;
     await _saveSettings();
@@ -86,29 +70,40 @@ class TextToSpeechService {
     }
   }
 
-  // TTS holatini olish
+  // Get TTS state
   bool get isEnabled => _isEnabled;
 
+  // Speak the given text
   Future<void> speak(String text) async {
     if (!_isEnabled) return;
 
     try {
       await _initialize();
+
       if (!_isInitialized) {
         print("TTS not initialized, cannot speak");
         return;
       }
-      await _flutterTts.setEngine("RHVoice");
       await _flutterTts.stop();
+
       await _flutterTts.speak(text);
     } catch (e) {
       print("Speak error: $e");
     }
   }
 
+  // Stop TTS
   Future<void> stop() async {
     try {
       await _flutterTts.stop();
+    } catch (e) {
+      print("Stop error: $e");
+    }
+  }
+
+  Future<void> setEngine(String engine) async {
+    try {
+      await _flutterTts.setEngine(engine);
     } catch (e) {
       print("Stop error: $e");
     }

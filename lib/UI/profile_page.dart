@@ -16,8 +16,8 @@ class ProfileScreen extends StatelessWidget {
             SizedBox(height: 20),
             CircleAvatar(
               radius: 60,
-              backgroundImage: NetworkImage(
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/BillieEilishO2160622_%2819_of_45%29_%2852153214339%29_%28cropped_3%29.jpg/1200px-BillieEilishO2160622_%2819_of_45%29_%2852153214339%29_%28cropped_3%29.jpg',
+              backgroundImage: AssetImage(
+                "assets/tony.jpg",
               ), // Foydalanuvchi avatari
             ),
             SizedBox(height: 10),
@@ -33,17 +33,18 @@ class ProfileScreen extends StatelessWidget {
               margin: EdgeInsets.symmetric(vertical: 8.0),
               child: Column(
                 children: <Widget>[
-
                   _buildListTile(
                     context,
                     Icons.credit_card_outlined,
                     'Kartalarim',
-                        () {
-                     Navigator.push(context, MaterialPageRoute(builder: (context) => CardsPage(),));
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => CardsPage()),
+                      );
                     },
                   ),
                   Divider(height: 1),
-
                 ],
               ),
             ),
@@ -65,9 +66,13 @@ class ProfileScreen extends StatelessWidget {
                     context,
                     Icons.fingerprint_outlined,
                     'Biometrik Kirish',
-                        () {
-                      Navigator.push(context, MaterialPageRoute(
-                        builder: (context) => BiometricAuthScreen(),));
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BiometricAuthScreen(),
+                        ),
+                      );
                     },
                   ),
                   Divider(height: 1),
@@ -75,7 +80,7 @@ class ProfileScreen extends StatelessWidget {
                     context,
                     Icons.lock_outline,
                     'Parolni O\'zgartirish',
-                        () {
+                    () {
                       // Parolni o'zgartirish sahifasiga o'tish
                       print('Parolni O\'zgartirish bo\'limi bosildi');
                     },
@@ -85,7 +90,7 @@ class ProfileScreen extends StatelessWidget {
                     context,
                     Icons.security_outlined,
                     'Xavfsizlik Sozlamalari',
-                        () {
+                    () {
                       // Umumiy xavfsizlik sozlamalariga o'tish
                       print('Xavfsizlik Sozlamalari bo\'limi bosildi');
                     },
@@ -93,8 +98,6 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-
-
 
             // Yordam
             Card(
@@ -128,10 +131,12 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildListTile(BuildContext context,
-      IconData icon,
-      String title,
-      VoidCallback onTap,) {
+  Widget _buildListTile(
+    BuildContext context,
+    IconData icon,
+    String title,
+    VoidCallback onTap,
+  ) {
     return ListTile(
       leading: Icon(icon, color: Colors.blue[700]),
       title: Text(title),

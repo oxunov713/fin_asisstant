@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../models/models.dart';
 import '../service/api_service.dart';
+import '../service/text_to_speech_service.dart'; // Import TTS service
 
 class CardsPage extends StatefulWidget {
   const CardsPage({super.key});
@@ -12,6 +12,7 @@ class CardsPage extends StatefulWidget {
 
 class _CardsPageState extends State<CardsPage> {
   late Future<UserModel?> _futureUser;
+  final TextToSpeechService _ttsService = TextToSpeechService(); // TTS service instance
 
   @override
   void initState() {
@@ -56,11 +57,15 @@ class _CardsPageState extends State<CardsPage> {
                   ? Icons.payment
                   : Icons.credit_score;
               final balance = card.expenses?.fold<double>(
-                  0,
-                      (prev, tx) =>
-                  prev +
-                      (tx.amount ?? 0)) ??
+                0,
+                    (prev, tx) => prev + (tx.amount ?? 0),
+              ) ??
                   0;
+
+              // Speak card details when the page is displayed
+              _ttsService.speak(
+                  "Card Type: ${card.cardType}, Card Number: ${card
+                      .cardNumber}, Balance: $balance so'm");
 
               return SingleChildScrollView(
                 child: Padding(
@@ -73,7 +78,10 @@ class _CardsPageState extends State<CardsPage> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           gradient: LinearGradient(
-                            colors: [color.withOpacity(0.9), color.withOpacity(0.6)],
+                            colors: [
+                              color.withOpacity(0.9),
+                              color.withOpacity(0.6)
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -85,12 +93,14 @@ class _CardsPageState extends State<CardsPage> {
                             const SizedBox(height: 20),
                             Text(
                               card.cardType ?? 'Card',
-                              style: const TextStyle(color: Colors.white, fontSize: 18),
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 18),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               card.cardNumber ?? '',
-                              style: const TextStyle(color: Colors.white, fontSize: 16),
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 16),
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -107,24 +117,43 @@ class _CardsPageState extends State<CardsPage> {
                       const SizedBox(height: 24),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Text("Transactions", style: Theme.of(context).textTheme.titleMedium),
+                        child: Text("Transactions", style: Theme
+                            .of(context)
+                            .textTheme
+                            .titleMedium),
                       ),
                       const SizedBox(height: 12),
-                      ...?card.expenses?.map((tx) {
+                      ...card.expenses.map((tx) {
+                        // Speak transaction details
+
+
                         return Card(
                           child: ListTile(
                             leading: Icon(
-                              (tx.amount ?? 0) > 0 ? Icons.arrow_downward : Icons.arrow_upward,
-                              color: (tx.amount ?? 0) > 0 ? Colors.green : Colors.red,
+                              (tx.amount ?? 0) > 0
+                                  ? Icons.arrow_downward
+                                  : Icons.arrow_upward,
+                              color: (tx.amount ?? 0) > 0
+                                  ? Colors.green
+                                  : Colors.red,
                             ),
-                            title: Text(tx.categoryName ?? tx.receiverName ?? 'Transaction'),
+                            onTap: () =>
+                                _ttsService.speak(
+                                    " ${tx.categoryName ??
+                                        tx.receiverName} ${tx.amount
+                                        .toInt()} so'm"),
+                            title: Text(tx.categoryName ?? tx.receiverName ??
+                                'Transaction'),
                             subtitle: tx.receiverPhoneNumber != null
                                 ? Text(tx.receiverPhoneNumber!)
                                 : null,
                             trailing: Text(
-                              "${(tx.amount ?? 0) > 0 ? '+' : ''}${tx.amount?.toInt()} so'm",
+                              "${(tx.amount ?? 0) > 0 ? '+' : '-'}${tx.amount
+                                  ?.toInt()} so'm",
                               style: TextStyle(
-                                color: (tx.amount ?? 0) > 0 ? Colors.green : Colors.red,
+                                color: (tx.amount ?? 0) > 0
+                                    ? Colors.green
+                                    : Colors.red,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -140,7 +169,9 @@ class _CardsPageState extends State<CardsPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          _ttsService.speak("Floating button pressed");
+        },
         child: const Icon(Icons.face_retouching_natural),
       ),
     );
